@@ -1,131 +1,134 @@
-> [!IMPORTANT]
-> **Estado del proyecto**
->
-> 1. Este proyecto es **IA slop**: fue generado y ensamblado rápidamente con ayuda de inteligencia artificial, pero en su primera iteración funcionó como se esperaba.
-> 2. El proyecto continúa en fase de pruebas. Con un solo micrófono está funcionando correctamente según las pruebas realizadas hasta ahora.
-> 3. La función para usar dos micrófonos todavía está en pruebas y, de momento, requiere ajustes manuales según los dispositivos, la latencia y el entorno.
 
+> [!IMPORTANT]
+> **Project status**
+>
+> 1. This project is **AI slop**: it was generated and assembled quickly with the help of artificial intelligence, but its first iteration worked as expected.
+> 2. The project is still in the testing phase. It is currently working well with a single microphone based on the tests performed so far.
+> 3. The two-microphone feature is still experimental and currently requires manual adjustments depending on the devices, latency, and environment.
 
 # OBS Voice Isolator
 
-Filtro nativo para OBS Studio, basado en la plantilla oficial `obsproject/obs-plugintemplate`.
+A native audio filter for OBS Studio, based on the official `obsproject/obs-plugintemplate`.
 
-## Qué hace
+## What it does
 
-1. **RNNoise** reduce ruido estacionario y parte del ruido variable.
-2. Una **puerta guiada por probabilidad de voz** intenta dejar pasar únicamente habla.
-3. Un detector heurístico atenúa **respiraciones y ruido no vocal**.
-4. Opcionalmente utiliza un **segundo micrófono como referencia ambiental** mediante un filtro adaptativo NLMS.
+1. **RNNoise** reduces stationary noise and some types of variable noise.
+2. A **voice-probability-driven gate** attempts to let only speech pass through.
+3. A heuristic detector attenuates **breathing sounds and non-vocal noise**.
+4. It can optionally use a **second microphone as an environmental reference** through an adaptive NLMS filter.
 
-## Verdad técnica
+## Technical reality
 
-No existe un filtro que garantice “solo voz y absolutamente nada más” en todos los cuartos, micrófonos y voces. Respiraciones, consonantes no sonoras y ciertos ruidos comparten características acústicas. Este plugin es agresivo: puede recortar palabras suaves, finales de frases, `s`, `f`, `j` y voz susurrada.
+No filter can guarantee “only voice and absolutely nothing else” across every room, microphone, and voice. Breathing sounds, unvoiced consonants, and certain types of noise share similar acoustic characteristics. This plugin is aggressive: it may cut quiet words, sentence endings, `s`, `f`, and `j` sounds, as well as whispered speech.
 
-El segundo micrófono ayuda principalmente con ruido correlacionado —ventilador, aire acondicionado, PC, calle—. No funciona como magia si ambos micrófonos tienen retrasos inestables, drivers distintos o capturan mucha voz.
+The second microphone mainly helps with correlated noise such as fans, air conditioning, computer noise, and street noise. It will not work magically if both microphones have unstable delays, use different drivers, or capture too much of the speaker’s voice.
 
-## Requisitos en Windows 11
+## Requirements on Windows 11
 
 - OBS Studio x64.
 - Visual Studio 2022.
-- Carga de trabajo **Desktop development with C++**.
+- **Desktop development with C++** workload.
 - MSVC v143.
-- Windows SDK 10.0.20348 o más reciente; recomendado 10.0.22621.
-- CMake 3.28 o superior.
+- Windows SDK 10.0.20348 or newer; 10.0.22621 is recommended.
+- CMake 3.28 or newer.
 - Git.
-- Internet durante la primera configuración: la plantilla descarga OBS 31.1.1 y `obs-deps`.
+- Internet access during the initial setup: the template downloads OBS 31.1.1 and `obs-deps`.
 
-Comprueba todo:
+Check all requirements:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\check-tools.ps1
-```
+````
 
 ## Build
 
-Desde PowerShell, en la raíz:
+From PowerShell, in the project root:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\build-windows.ps1
 ```
 
-Build limpio:
+Clean build:
 
 ```powershell
 .\scripts\build-windows.ps1 -Clean
 ```
 
-El resultado queda en:
+The output is generated at:
 
 ```text
 dist\obs-voice-isolator\bin\64bit\obs-voice-isolator.dll
 dist\obs-voice-isolator\data\locale\...
 ```
 
-## Instalación
+## Installation
 
-Cierra OBS y ejecuta:
+Close OBS and run:
 
 ```powershell
 .\scripts\install-user.ps1
 ```
 
-Para eliminarlo:
+To remove it:
 
 ```powershell
 .\scripts\uninstall-user.ps1
 ```
 
-## Configuración en OBS
+## Configuration in OBS
 
-### Un micrófono
+### One microphone
 
-1. Agrega tu micrófono principal a OBS.
-2. Abre **Filtros**.
-3. En filtros de audio, agrega **Aislador de voz (agresivo)**.
-4. Habla normal, bajo y fuerte mientras ajustas:
-   - **Umbral de probabilidad de voz**: mayor elimina más, pero corta más voz.
-   - **Supresión de respiración**: `0.90–1.00` es muy agresivo.
-   - **Liberación / cola**: `100–200 ms` conserva finales de palabras.
-   - **Piso de ruido**: empieza en `-58 dB`.
+1. Add your main microphone to OBS.
+2. Open **Filters**.
+3. Under audio filters, add **Voice Isolator (aggressive)**.
+4. Speak normally, quietly, and loudly while adjusting:
 
-### Dos micrófonos
+   * **Voice probability threshold**: higher values remove more noise, but may cut more of your voice.
+   * **Breath suppression**: `0.90–1.00` is very aggressive.
+   * **Release / tail**: `100–200 ms` helps preserve the endings of words.
+   * **Noise floor**: start at `-58 dB`.
 
-1. El micrófono cercano a tu boca es la fuente principal.
-2. Agrega el segundo como otra fuente **Captura de entrada de audio**.
-3. En el filtro del micrófono principal, selecciona esa fuente en **Micrófono auxiliar de ambiente**.
-4. Coloca el auxiliar lejos de la boca y más cerca del ruido.
-5. Empieza con:
-   - Cancelación auxiliar: `0.50–0.70`.
-   - Adaptación: `0.02–0.05`.
-   - Desfase: `0 ms`.
-6. En silencio, deja el ruido sonar varios segundos para que el filtro se adapte.
-7. Si empeora o produce sonido metálico, desactiva el auxiliar o ajusta el desfase entre `-50` y `+50 ms`.
+### Two microphones
 
-No envíes el micrófono auxiliar a la grabación o stream si solo lo quieres como referencia: silencia sus pistas/salida según tu configuración, pero no lo silencies internamente antes de que OBS lo capture.
+1. The microphone closest to your mouth should be the main source.
+2. Add the second microphone as another **Audio Input Capture** source.
+3. In the main microphone filter, select that source under **Auxiliary environment microphone**.
+4. Place the auxiliary microphone farther from your mouth and closer to the noise source.
+5. Start with:
 
-## Registro y diagnóstico
+   * Auxiliary cancellation: `0.50–0.70`.
+   * Adaptation: `0.02–0.05`.
+   * Offset: `0 ms`.
+6. While remaining silent, let the environmental noise play for several seconds so the filter can adapt.
+7. If the result becomes worse or sounds metallic, disable the auxiliary microphone or adjust the offset between `-50` and `+50 ms`.
 
-En OBS abre:
+Do not send the auxiliary microphone to the recording or stream if you only want to use it as a reference. Mute its tracks or output according to your OBS configuration, but do not prevent OBS from capturing it internally.
+
+## Logging and diagnostics
+
+In OBS, open:
 
 ```text
-Ayuda → Archivos de registro → Ver registro actual
+Help → Log Files → View Current Log
 ```
 
-Busca:
+Search for:
 
 ```text
 [obs-voice-isolator]
 ```
 
-Si el filtro no aparece, comprueba:
+If the filter does not appear, check:
 
 ```text
 %APPDATA%\obs-studio\plugins\obs-voice-isolator\bin\64bit\obs-voice-isolator.dll
 %APPDATA%\obs-studio\plugins\obs-voice-isolator\data\locale\es-ES.ini
 ```
 
-## Licencia
+## License
 
-GPL-2.0-or-later, compatible con la plantilla y con OBS Studio.
+GPL-2.0-or-later, compatible with the template and OBS Studio.
+
