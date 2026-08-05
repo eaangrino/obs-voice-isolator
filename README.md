@@ -1,3 +1,11 @@
+> [!IMPORTANT]
+> **Estado del proyecto**
+>
+> 1. Este proyecto es **IA slop**: fue generado y ensamblado rápidamente con ayuda de inteligencia artificial, pero en su primera iteración funcionó como se esperaba.
+> 2. El proyecto continúa en fase de pruebas. Con un solo micrófono está funcionando correctamente según las pruebas realizadas hasta ahora.
+> 3. La función para usar dos micrófonos todavía está en pruebas y, de momento, requiere ajustes manuales según los dispositivos, la latencia y el entorno.
+
+
 # OBS Voice Isolator
 
 Filtro nativo para OBS Studio, basado en la plantilla oficial `obsproject/obs-plugintemplate`.
