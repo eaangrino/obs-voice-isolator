@@ -90,7 +90,7 @@ Para eliminarlo:
    - **Liberación / cola**: `100–200 ms` conserva finales de palabras.
    - **Piso de ruido**: empieza en `-58 dB`.
 
-### Dos micrófonos
+### Dos micrófonos (Experimental)
 
 1. El micrófono cercano a tu boca es la fuente principal.
 2. Agrega el segundo como otra fuente **Captura de entrada de audio**.
