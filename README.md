@@ -91,7 +91,7 @@ To remove it:
    * **Release / tail**: `100–200 ms` helps preserve the endings of words.
    * **Noise floor**: start at `-58 dB`.
 
-### Two microphones
+### Two microphones (Experimental)
 
 1. The microphone closest to your mouth should be the main source.
 2. Add the second microphone as another **Audio Input Capture** source.
